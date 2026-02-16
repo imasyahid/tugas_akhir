@@ -1,0 +1,11 @@
+[
+  {
+    "id": 1749297987995,
+    "nama": "Arya update",
+    "umur": 22,
+    "gender": "Male",
+    "email": "arya@example.com",
+    "no_telepon": "08123456789",
+    "password": "secret123"
+  }
+]

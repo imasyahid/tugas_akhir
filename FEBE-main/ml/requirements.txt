@@ -1,0 +1,7 @@
+gunicorn
+fastapi
+joblib
+numpy
+pydantic
+requests
+uvicorn

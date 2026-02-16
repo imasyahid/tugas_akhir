@@ -1,0 +1,20 @@
+[
+  {
+    "id": 1749297987995,
+    "nama": "Arya update",
+    "umur": 22,
+    "gender": "Male",
+    "email": "arya@example.com",
+    "no_telepon": "08123456789",
+    "password": "secret123"
+  },
+  {
+    "id": 1771261351400,
+    "nama": "wawa",
+    "umur": "23",
+    "gender": "male",
+    "email": "wawa@gmail.com",
+    "no_telepon": "0899999912",
+    "password": "wawa123"
+  }
+]

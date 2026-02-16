@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Prediksi Diabetes</title>
+</head>
+<body>
+  <h1>Prediksi Diabetes</h1>
+  <form id="predictForm">
+    <label>Usia: <input type="number" step="any" name="age" required></label><br>
+    <label>BMI: <input type="number" step="any" name="bmi" required></label><br>
+    <label>Blood Glucose Level: <input type="number" step="any" name="blood_glucose_level" required></label><br>
+    <label>Gender:
+      <select name="gender" required>
+        <option value="Male">Male</option>
+        <option value="Female">Female</option>
+      </select>
+    </label><br>
+    <label>Smoking History:
+      <select name="smoking_history" required>
+        <option value="Yes">Yes</option>
+        <option value="No">No</option>
+        <option value="Unknown">Unknown</option>
+      </select>
+    </label><br>
+    <label>HbA1c Level: <input type="number" step="any" name="HbA1c_level" required></label><br>
+    <button type="submit">Prediksi</button>
+  </form>
+
+  <h2>Hasil:</h2>
+  <div id="result">
+  </div>
+
+  <script>
+    document.getElementById("predictForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
+
+      const form = e.target;
+      const data = {
+        age: parseFloat(form.age.value),
+        bmi: parseFloat(form.bmi.value),
+        blood_glucose_level: parseFloat(form.blood_glucose_level.value),
+        gender: form.gender.value,
+        smoking_history: form.smoking_history.value,
+        HbA1c_level: parseFloat(form.HbA1c_level.value)
+      };
+
+      const response = await fetch("/predict", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(data)
+      });
+
+      const resultData = await response.json();
+
+      let color = resultData.prediction_result === "Diabetes" ? "red" : "green";
+
+      document.getElementById("result").innerHTML = `
+        <p><strong>Hasil:</strong> <span style="color: ${color};">${resultData.prediction_result}</span></p>
+        <p><strong>Skor:</strong> ${resultData.score.toFixed(4)}</p>
+      `;
+    });
+  </script>
+</body>
+</html>
