@@ -5,6 +5,9 @@ const fetch = require('node-fetch'); // npm install node-fetch@2
 const app = express();
 const port = process.env.PORT || 3000;
 
+// Import middleware
+const { verifyToken } = require('./middleware/auth');
+
 // Middleware
 app.use(cors());
 app.use(express.json());
@@ -15,44 +18,77 @@ const obatRoutes = require('./routes/obat');
 const prediksiRoutes = require('./routes/prediksi');
 const kadarGulaRoutes = require('./routes/kadar-gula');
 
-app.use('/users', userRoutes);      // Tambahkan baris ini
-app.use('/obat', obatRoutes);       // Tambahkan baris ini
-app.use('/prediksi', prediksiRoutes);
-app.use('/kadar-gula', kadarGulaRoutes);
+// Public routes (tidak perlu authentication)
+app.use('/users', userRoutes);  // /users/login, POST /users (register)
+
+// Protected routes (membutuhkan JWT token)
+app.use('/obat', verifyToken, obatRoutes);
+app.use('/prediksi', verifyToken, prediksiRoutes);
+app.use('/kadar-gula', verifyToken, kadarGulaRoutes);
+
 app.use(express.static(path.join(__dirname, 'public')));
 
 // Root endpoint
 app.get('/', (req, res) => {
-  res.send('RESTful API is running!');
+  res.send('RESTful API is running! Version 2.0 with JWT Authentication');
 });
 
-app.post('/predict', async (req, res) => {
+// ML API Predict endpoint
+app.post('/predict', verifyToken, async (req, res) => {
   try {
-    console.log('Data dari frontend:', req.body); // Tambahkan baris ini untuk melihat data inputan
+    console.log('📊 Data dari frontend:', req.body);
+    
+    const ML_API_URL = process.env.ML_API_URL || 'http://127.0.0.1:5501';
+    
     // Kirim data ke ML API
-    const mlResponse = await fetch('http://127.0.0.1:5501/predict', {
+    const mlResponse = await fetch(`${ML_API_URL}/predict`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(req.body)
     });
+    
+    if (!mlResponse.ok) {
+      throw new Error(`ML API error: ${mlResponse.status}`);
+    }
+    
     const result = await mlResponse.json();
+    
     // (Opsional) Simpan ke database/file di sini
-    res.json(result);
+    res.json({
+      success: true,
+      prediction: result,
+      timestamp: new Date().toISOString()
+    });
   } catch (err) {
-    res.status(500).json({ error: 'Gagal memproses prediksi' });
+    console.error('❌ Prediction error:', err.message);
+    res.status(500).json({ 
+      success: false,
+      error: 'Gagal memproses prediksi',
+      message: err.message,
+      tip: 'Pastikan ML API running di port 5501'
+    });
   }
 });
 
-// Error handling global (letakkan di sini, sebelum app.listen)
+// Health check endpoint
+app.get('/health', (req, res) => {
+  res.json({ status: 'OK', timestamp: new Date().toISOString() });
+});
+
+// Error handling global
 app.use((err, req, res, next) => {
-  res.status(500).json({ message: err.message || "Internal server error" });
+  console.error('Server error:', err);
+  res.status(err.status || 500).json({ 
+    message: err.message || "Internal server error",
+    timestamp: new Date().toISOString()
+  });
 });
 
-// Start server
-app.listen(port, () => {
-  console.log(`Server is running on http://localhost:${port}`);
-});
-
+// Redirect legacy endpoint
 app.get('/kadargula', (req, res) => {
   res.redirect('https://apidiaw-production.up.railway.app/kadar-gula');
 });
+
+// Export the app for serverless platforms (Vercel)
+module.exports = app;
+
