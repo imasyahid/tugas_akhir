@@ -1,0 +1,50 @@
+# Byte-compiled / cache
+__pycache__/
+*.py[cod]
+
+# Virtual environments
+venv/
+.env/
+.venv/
+
+# Jupyter notebook checkpoints
+.ipynb_checkpoints/
+
+# VS Code config
+.vscode/
+
+# OS-specific files
+.DS_Store
+Thumbs.db
+
+# Model artifacts
+*.h5
+*.pkl
+*.pb
+
+# TensorFlow saved_model structure
+models/**/saved_model.pb
+models/**/fingerprint.pb
+models/**/variables/
+
+# models/
+
+# Docker
+*.log
+*.pid
+docker-compose.override.yml
+
+# Ignore outputs from experiments
+*.out
+*.log
+
+# Static build artifacts (if any)
+staticfiles/
+build/
+dist/
+
+# Environment variables
+.env
+
+# Ignore app folder
+app/

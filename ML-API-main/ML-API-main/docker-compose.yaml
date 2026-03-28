@@ -1,0 +1,17 @@
+
+services:
+  tf-serving:
+    image: tensorflow/serving
+    ports:
+      - 8501:8501
+    volumes:
+      - ./models/ann:/models/ann
+    environment:
+      - MODEL_NAME=ann
+
+  fastapi-app:
+    build: .
+    ports:
+      - 8000:8000
+    depends_on:
+      - tf-serving
